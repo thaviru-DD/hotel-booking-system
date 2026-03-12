@@ -1,0 +1,22 @@
+# Environment Variables
+.env
+.env.local
+.env.development
+.env.production
+server/.env
+client/.env
+
+# Dependencies
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# Build
+client/build/
+
+# Logs
+*.log
+
+# OS Files
+.DS_Store
+Thumbs.db
