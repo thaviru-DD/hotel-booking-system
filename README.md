@@ -1,4 +1,4 @@
-# 🏨 Hotel Booking System
+# Hotel Booking System
 
 A full-stack hotel booking system inspired by Booking.com
 

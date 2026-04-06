@@ -11,7 +11,6 @@ const generateToken = (id) => {
 // Helper: Send token response
 const sendTokenResponse = (user, statusCode, res) => {
   const token = generateToken(user._id);
-
   res.status(statusCode).json({
     success: true,
     token,
@@ -30,18 +29,29 @@ const sendTokenResponse = (user, statusCode, res) => {
 // @access  Public
 exports.register = async (req, res, next) => {
   try {
+    console.log('📥 Register hit');
+    console.log('📦 Body:', req.body);
+
     const { name, email, password, role } = req.body;
 
-    // Check if user already exists
+    if (!name || !email || !password) {
+      console.log('❌ Missing fields');
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide name, email and password'
+      });
+    }
+
     const existingUser = await User.findOne({ email });
     if (existingUser) {
+      console.log('❌ Email already exists');
       return res.status(400).json({
         success: false,
         message: 'Email already registered'
       });
     }
 
-    // Create user (only allow guest or owner on register)
+    console.log('💾 Creating user...');
     const user = await User.create({
       name,
       email,
@@ -49,8 +59,11 @@ exports.register = async (req, res, next) => {
       role: role === 'owner' ? 'owner' : 'guest'
     });
 
+    console.log('✅ User created:', user._id);
     sendTokenResponse(user, 201, res);
+
   } catch (error) {
+    console.log('❌ Error:', error.message);
     next(error);
   }
 };
@@ -62,7 +75,6 @@ exports.login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
-    // Validate email & password provided
     if (!email || !password) {
       return res.status(400).json({
         success: false,
@@ -70,7 +82,6 @@ exports.login = async (req, res, next) => {
       });
     }
 
-    // Find user (include password for comparison)
     const user = await User.findOne({ email }).select('+password');
     if (!user) {
       return res.status(401).json({
@@ -79,7 +90,6 @@ exports.login = async (req, res, next) => {
       });
     }
 
-    // Check password
     const isMatch = await user.matchPassword(password);
     if (!isMatch) {
       return res.status(401).json({
